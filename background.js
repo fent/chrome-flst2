@@ -15,6 +15,13 @@ function removeTab(tabID, winID) {
 }
 
 var updating = false;
+function focusLastTab(list) {
+  updating = true;
+  chrome.tabs.update(list[list.length - 2], { active: true }, function() {
+    updating = false;
+  });
+}
+
 chrome.tabs.onActivated.addListener(function(info) {
   if (!windows[info.windowId]) {
     windows[info.windowId] = [info.tabId];
@@ -31,15 +38,16 @@ chrome.tabs.onRemoved.addListener(function(tabID, info) {
   }
   var list = windows[info.windowId];
   if (list[list.length - 1] === tabID) {
-    updating = true;
-    chrome.tabs.update(list[list.length - 2], { active: true }, function() {
-      updating = false;
-    });
+    focusLastTab(list);
   }
   removeTab(tabID, info.windowId);
 });
 
 chrome.tabs.onDetached.addListener(function(tabID, info) {
+  var list = windows[info.oldWindowId];
+  if (list.length) {
+    focusLastTab(list);
+  }
   removeTab(tabID, info.oldWindowId);
 });
 
