@@ -1,9 +1,9 @@
 /* global chrome */
 
-var windows = {};
+const windows = {};
 
-chrome.tabs.query({ active: true }, function(tabs) {
-  tabs.forEach(function(tab) {
+chrome.tabs.query({ active: true }, (tabs) => {
+  tabs.forEach((tab) => {
     windows[tab.windowId] = [tab.id];
   });
 });
@@ -19,14 +19,14 @@ function focusLastTab(tabID, winID) {
   var list = windows[winID];
   if (list.length > 1 && list[list.length - 1] === tabID) {
     updating = true;
-    chrome.tabs.update(list[list.length - 2], { active: true }, function() {
+    chrome.tabs.update(list[list.length - 2], { active: true }, () => {
       updating = false;
     });
   }
   removeTab(tabID, winID);
 }
 
-chrome.tabs.onActivated.addListener(function(info) {
+chrome.tabs.onActivated.addListener((info) => {
   if (!windows[info.windowId]) {
     windows[info.windowId] = [info.tabId];
   } else if (!updating) {
@@ -35,7 +35,7 @@ chrome.tabs.onActivated.addListener(function(info) {
   }
 });
 
-chrome.tabs.onRemoved.addListener(function(tabID, info) {
+chrome.tabs.onRemoved.addListener((tabID, info) => {
   if (info.isWindowClosing) {
     delete windows[info.windowId];
     return;
@@ -43,11 +43,11 @@ chrome.tabs.onRemoved.addListener(function(tabID, info) {
   focusLastTab(tabID, info.windowId);
 });
 
-chrome.tabs.onDetached.addListener(function(tabID, info) {
+chrome.tabs.onDetached.addListener((tabID, info) => {
   focusLastTab(tabID, info.oldWindowId);
 });
 
-chrome.tabs.onAttached.addListener(function(tabID, info) {
+chrome.tabs.onAttached.addListener((tabID, info) => {
   if (!windows[info.newWindowId]) {
     windows[info.newWindowId] = [tabID];
   } else {
